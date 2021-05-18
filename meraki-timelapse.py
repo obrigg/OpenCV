@@ -9,7 +9,7 @@ from rich.progress import track
 
 
 # User inputs
-mv_serial = "Q2FV-VYGH-ZVB3"
+mv_serial = "Your Meraki MV Serial"
 snapshot_frequency = 5      # in minutes
 timelapse_timeframe = 24     # in hours
 
