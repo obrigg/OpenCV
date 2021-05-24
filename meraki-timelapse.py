@@ -9,7 +9,7 @@ from rich.progress import track
 
 
 # User inputs
-mv_serial = "Your Meraki MV Serial"
+mv_serial = "Q2FV-VYGH-ZVB3"
 snapshot_frequency = 5      # in minutes
 timelapse_timeframe = 24     # in hours
 
@@ -64,8 +64,11 @@ number_of_snapshots = int((now-timestamp)/timedelta(minutes=snapshot_frequency))
 snapshot_details = {}
 meraki_key = os.environ.get('MERAKI_KEY')
 sleeping_time = 1*60
+if not os.path.isdir('snapshots'):
+    os.mkdir('snapshots')
 
 # Generating snapshots via Meraki's Dashboard API.
+print(f"Expected results by {time.ctime(time.time() + number_of_snapshots/10*61)}")
 for i in track(range(number_of_snapshots), description="Generating and saving snapshots..."):
     meraki_timestamp = {"timestamp": str(timestamp.isoformat() + "Z")}
     try:
@@ -76,11 +79,14 @@ for i in track(range(number_of_snapshots), description="Generating and saving sn
     timestamp += timedelta(minutes=snapshot_frequency)
     # After 10 snapshots - pause and retrieve them
     if (i+1) % 10 == 0:
+        print(f"Waiting {sleeping_time} seconds")
         time.sleep(sleeping_time)
         for snapshot_name in snapshot_details:
             if not "status" in snapshot_details[snapshot_name].keys():
-                if snapshot_details[snapshot_name]['status'] != "Ok":
+                snapshot_details[snapshot_name]['status'] = save_snapshot(snapshot_details[snapshot_name]["url"],f"./snapshots/{snapshot_name}.jpg")
+            elif snapshot_details[snapshot_name]['status'] != "Ok":
                     snapshot_details[snapshot_name]['status'] = save_snapshot(snapshot_details[snapshot_name]["url"],f"./snapshots/{snapshot_name}.jpg")
+        print(f"Waiting {sleeping_time} seconds")
         time.sleep(sleeping_time)
 #
 print(f"Waiting another {int(sleeping_time/60)} minutes... just in case.")
